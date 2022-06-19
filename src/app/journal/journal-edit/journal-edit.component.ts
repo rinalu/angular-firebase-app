@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Observable } from 'rxjs';
 import { faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
 import { faSave } from '@fortawesome/free-regular-svg-icons'
@@ -17,15 +17,16 @@ export class JournalEditComponent {
     faTrashAlt = faTrashAlt;
 
     tasksSaved:Observable<any[]>;
-    constructor(public journalEditService:JournalEditService, private afAuth:AngularFireAuth) {
-        const user = afAuth.auth.currentUser;
-        if (user)
-            this.getUserTasks(user.uid);
+    constructor(public journalEditService:JournalEditService, private afAuth: AngularFireAuth) {
+        afAuth.currentUser.then((user) => {
+            if (user)
+                this.getUserTasks(user.uid);
+        });
     }
 
-    getUserTasks(uid:string) {
+    async getUserTasks(uid:string) {
         if (this.journalEditService.sessionTasks.length === 0)
-            this.tasksSaved = this.journalEditService.getTasks(uid);
+            this.tasksSaved = await this.journalEditService.getTasks(uid);
     }
 
     markDone(docId:string) {

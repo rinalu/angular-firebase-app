@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 import { faCaretRight } from '@fortawesome/free-solid-svg-icons'
@@ -14,7 +14,7 @@ import { AboutService } from './about.service';
 export class AboutComponent {
     faCaretRight = faCaretRight;
 
-    constructor(public aboutService: AboutService, private db: AngularFirestore) {
+    constructor(public aboutService: AboutService, private db: Firestore) {
         aboutService.getSkills();
         aboutService.getExperiences();
     }

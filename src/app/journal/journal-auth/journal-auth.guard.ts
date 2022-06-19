@@ -3,8 +3,8 @@ import {
     CanActivate,
     ActivatedRouteSnapshot, RouterStateSnapshot, Router
 } from '@angular/router';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { Observable } from 'rxjs';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { first, from, Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -14,16 +14,20 @@ export class JournalAuthGuard implements CanActivate {
 
     canActivate(
         next: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot): boolean {
+        state: RouterStateSnapshot): Observable<boolean> {
             let url: string = state.url;
             return this.checkAuth(url);
     }
 
-    checkAuth(url: string): boolean {
-        if (this.afAuth.auth.currentUser) {
-            return true;
-        }
-        this.router.navigate(['journal']);
-        return false;
+    checkAuth(url: string): Observable<boolean> {
+        const userStatePromise = this.afAuth.currentUser.then((user) => {
+            return user == null ? false : true;
+        });
+        return from(userStatePromise).pipe(first((userState) => {
+            if (!userState) {
+                this.router.navigate(['journal']);
+            }
+            return userState;
+        }));
     }
 }

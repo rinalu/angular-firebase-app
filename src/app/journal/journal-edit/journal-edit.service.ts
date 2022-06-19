@@ -1,58 +1,70 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
+import { Observable, Subject, Subscription } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { Firestore, collection, doc, CollectionReference, getDocs, addDoc, deleteDoc, updateDoc, getDoc, setDoc } from '@angular/fire/firestore';
 
 @Injectable({
     providedIn: 'root'
 })
 
 export class JournalEditService {
-    sessionTasks:any[] = [];
-    subscriptions:Subscription[] = [];
+    sessionTasks: any[] = [];
+    subscriptions: Subscription[] = [];
 
-    private uid:string = '';
-    private collectionRef:AngularFirestoreCollection<any>;
-    constructor(private db: AngularFirestore) {}
+    private uid: string = '';
+    private collectionRef: CollectionReference<any>;
+    constructor(private db: Firestore) {}
 
-    getTasks(uid:string): Observable<any[]> {
+    async getTasks(uid: string): Promise<Observable<any[]>> {
         this.uid = uid;
-        this.collectionRef = this.db.collection('notes').doc(uid).collection('tasks');
-        this.subscriptions.push(this.collectionRef.get().pipe(map(snapshot =>
-            snapshot.docs.map(e => ({ docId: e.id, ...e.data() })))
-        ).subscribe(res => this.sessionTasks = res));
-        return this.collectionRef.snapshotChanges().pipe(
-            map(actions => actions.map(a => {
-                const docId = a.payload.doc.id;
-                const data = a.payload.doc.data();
-                return { docId, ...data }
-            }))
-        );
-    }
+        const currentUserNoteRef = doc(collection(this.db, 'notes'), uid);
+        const currentUserNotes = await getDoc(currentUserNoteRef);
 
-    removeTask(i:number, docId:any):void {
-        this.sessionTasks.splice(i, 1);
-        // if task has id, remove from database as well
-        if (docId) {
-            this.collectionRef.doc(docId).delete();
+        if (currentUserNotes.exists()) {
+            this.collectionRef = collection(currentUserNoteRef, 'tasks');
+
+            const taskDataObservable = new Subject<any>();
+            taskDataObservable.pipe(
+                switchMap(() => getDocs(this.collectionRef)),
+                map((task: any) => ({ docId: task.id, ...task.data() }))
+            );
+            this.subscriptions.push(taskDataObservable.subscribe(res => this.sessionTasks = res));
+            return taskDataObservable;
+
+        } else {
+            this.createNewNoteCollectionForUser();
         }
     }
 
-    updateTask(id:string, obj:any):void {
-        this.collectionRef.doc(id).update(obj);
+    async createNewNoteCollectionForUser(): Promise<void> {
+        const notesCollection = collection(this.db, 'notes');
+        await setDoc(doc(notesCollection, this.uid), {});
+        this.collectionRef = collection(doc(notesCollection, this.uid), 'tasks');
     }
 
-    saveTask(text:string):void {
+    removeTask(i:number, docId:any): void {
+        this.sessionTasks.splice(i, 1);
+        // if task has id, remove from database as well
+        if (docId) {
+            deleteDoc(doc(this.collectionRef, docId));
+        }
+    }
+
+    updateTask(id:string, obj:any): void {
+        updateDoc(doc(this.collectionRef, id), obj);
+    }
+
+    saveTask(text:string): void {
         const newTask = {
             created_by: this.uid,
             task: text,
             timestamp: new Date(),
             accomplished: false,
         }
-        this.collectionRef.add(newTask);
+        addDoc(this.collectionRef, newTask);
     }
 
-    addEmptyTask():void {
+    addEmptyTask(): void {
         this.sessionTasks.push({
             task: ''
         });
