@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 @Component({
@@ -9,7 +9,11 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 })
 
 export class JournalAuthComponent {
-    constructor(private afAuth: AngularFireAuth, private router:Router) {}
+    constructor(
+        private afAuth: AngularFireAuth, 
+        private route: ActivatedRoute,
+        private router: Router
+    ) {}
 
     login() {
         this.afAuth.signInAnonymously();

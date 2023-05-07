@@ -22,7 +22,7 @@
         <h4>Things of the day</h4>
         <div class="display-groups">
             <ul class="list-group">
-                <li class="tasks list-group-item" *ngFor="let taskData of tasksSaved | async">
+                <li class="tasks list-group-item" *ngFor="let taskData of tasksSaved$ | async">
                     <input type="checkbox" class="check-off-task" (click)="markDone(taskData.docId)" [checked]="taskData.accomplished">
                     <span>{{ taskData.task }}</span>
                 </li>

@@ -7,6 +7,7 @@ import { JournalRoutingModule } from './journal-routing.module';
 import { JournalComponent } from './journal.component';
 import { JournalAuthComponent } from './journal-auth/journal-auth.component';
 import { JournalEditComponent } from './journal-edit/journal-edit.component';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 
 @NgModule({
     declarations: [
@@ -18,7 +19,8 @@ import { JournalEditComponent } from './journal-edit/journal-edit.component';
         CommonModule,
         FormsModule,
         FontAwesomeModule,
-        JournalRoutingModule
+        JournalRoutingModule,
+        provideAuth(() => getAuth()),
     ]
 })
 export class JournalModule {}

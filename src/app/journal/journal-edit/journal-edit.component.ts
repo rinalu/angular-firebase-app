@@ -11,12 +11,13 @@ import { JournalEditService } from './journal-edit.service';
     templateUrl: './journal-edit.component.html',
     styleUrls: ['../../../assets/scss/journal.scss']
 })
+
 export class JournalEditComponent {
     faPlus = faPlus;
     faSave = faSave;
     faTrashAlt = faTrashAlt;
 
-    tasksSaved:Observable<any[]>;
+    tasksSaved$: Observable<any[]>;
     constructor(public journalEditService:JournalEditService, private afAuth: AngularFireAuth) {
         afAuth.currentUser.then((user) => {
             if (user)
@@ -26,7 +27,7 @@ export class JournalEditComponent {
 
     async getUserTasks(uid:string) {
         if (this.journalEditService.sessionTasks.length === 0)
-            this.tasksSaved = await this.journalEditService.getTasks(uid);
+            this.tasksSaved$ = await this.journalEditService.getTasks(uid);
     }
 
     markDone(docId:string) {
@@ -53,7 +54,7 @@ export class JournalEditComponent {
     }
 
     deleteBlock(i:number, docId:any) {
-        console.log(docId)
+        console.log(docId);
         this.journalEditService.removeTask(i, docId);
     }
 
