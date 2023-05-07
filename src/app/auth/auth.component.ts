@@ -1,8 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import { Firestore } from '@angular/fire/firestore';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { faQuestionCircle } from '@fortawesome/free-regular-svg-icons';
 
 import { AuthService } from './auth.service';
@@ -23,7 +23,7 @@ export class AuthComponent {
     items: Observable<any[]>;
     subscriptions: Subscription[] = [];
     constructor(
-        private authService: AuthService, private db: AngularFirestore,
+        private authService: AuthService, private db: Firestore,
         private modalService: NgbModal, public router: Router
     ) {
         this.explainText = "This authentication is used to limit access to \
@@ -40,8 +40,8 @@ export class AuthComponent {
     }
 
     login() {
-        let sub = this.authService.getCompany(this.companyName).subscribe(
-            (res:any[]) => {
+        let sub = this.authService.getCompany(this.companyName).subscribe({
+            next: (res: any[]) => {
                 if (this.authService.authenticated) {
                     let redirectUrl = this.authService.redirectUrl ?
                     this.router.parseUrl(this.authService.redirectUrl) : '/home';
@@ -50,11 +50,10 @@ export class AuthComponent {
                     this.router.navigateByUrl(redirectUrl);
                 }
             },
-            (err) => {},
-            () => {
+            complete: () => {
                 this.authService.updateUsage();
             }
-        );
+        });
         this.subscriptions.push(sub);
     }
 

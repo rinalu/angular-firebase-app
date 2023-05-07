@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 @Component({
     selector: 'journal-auth',
@@ -9,11 +9,15 @@ import { AngularFireAuth } from '@angular/fire/auth';
 })
 
 export class JournalAuthComponent {
-    constructor(private afAuth:AngularFireAuth, private router:Router) {}
+    constructor(
+        private afAuth: AngularFireAuth, 
+        private route: ActivatedRoute,
+        private router: Router
+    ) {}
 
     login() {
-        this.afAuth.auth.signInAnonymously();
-        this.afAuth.auth.onAuthStateChanged(user => {
+        this.afAuth.signInAnonymously();
+        this.afAuth.onAuthStateChanged(user => {
             this.router.navigate(['journal', 'edit']);
         });
     }

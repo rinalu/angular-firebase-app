@@ -4,9 +4,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
@@ -17,6 +16,7 @@ import { AboutComponent } from './about/about.component';
 import { AuthComponent } from './auth/auth.component';
 import { HomeComponent } from './home/home.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { AngularFireModule } from '@angular/fire/compat';
 
 @NgModule({
     declarations: [
@@ -33,9 +33,12 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
         NgbModule,
         FontAwesomeModule,
         JournalModule,
-        AngularFireAuthModule,
-        AngularFireModule.initializeApp(environment.firebase, 'resume-app'),
-        AngularFirestoreModule,
+        // Angular fire undergoing major changes, old version and new version are not compatible
+        // Have to initialize 2 different imports in order to support old authentication
+        // https://stackoverflow.com/questions/69844586/nullinjectorerror-no-provider-for-injectiontoken-angularfire2-app-options-2021
+        AngularFireModule.initializeApp(environment.firebase),
+        provideFirebaseApp(() => initializeApp(environment.firebase)),
+        provideFirestore(() => getFirestore()),
         AppRoutingModule,
     ],
     bootstrap: [ AppComponent ]

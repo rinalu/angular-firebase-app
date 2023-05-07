@@ -5,6 +5,7 @@ import { JournalAuthGuard } from './journal-auth/journal-auth.guard';
 import { JournalAuthComponent } from './journal-auth/journal-auth.component';
 import { JournalEditComponent } from './journal-edit/journal-edit.component';
 import { JournalComponent } from './journal.component';
+import { Observable } from 'rxjs';
 
 const journalRoutes: Routes = [
     {
@@ -18,7 +19,7 @@ const journalRoutes: Routes = [
             {
                 path: 'edit',
                 component: JournalEditComponent,
-                canActivate: [ JournalAuthGuard ]
+                canActivate: [ JournalAuthGuard ],
             }
         ]
     }
